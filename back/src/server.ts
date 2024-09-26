@@ -11,6 +11,7 @@ import { app } from './app';
 import { ringRoutes } from './routes/ringRoutes';
 import { env } from 'process';
 import sequelize from './models';
+import { errorHandler } from './routes/error-handler';
 
 const port = env.PORT || 3000;
 
@@ -34,6 +35,7 @@ app.register(fastifySwagger, {
 app.register(fastifySwaggerUi, {
   routePrefix: '/docs',
 });
+app.setErrorHandler(errorHandler);
 
 app.setValidatorCompiler(validatorCompiler);
 app.setSerializerCompiler(serializerCompiler);

@@ -89,6 +89,14 @@ describe('Ring Routes', () => {
         .set({ Authorization: `Bearer ${TOKEN}` })
         .send(invalidRing);
 
+      expect(response.body).toEqual({
+        message: 'Invalid input',
+        errors: {
+          bearer: ['Required'],
+          forgedBy: ['Required'],
+          image: ['Required'],
+        },
+      });
       expect(response.status).toBe(400);
     });
 
@@ -98,34 +106,35 @@ describe('Ring Routes', () => {
         .set({ Authorization: `Bearer invalidToken` })
         .send({ name: 'Test Ring', power: 'Invisibility', bearer: userId });
 
+      expect(response.body).toEqual({
+        message: 'Invalid token',
+      });
       expect(response.status).toBe(401);
-      expect(response.body).toEqual({ error: 'Token Unauthorized' });
     });
   });
 
   describe('PUT /rings/:id', () => {
     it('should update an existing ring', async () => {
-      const updatedRing = {
-        name: 'Updated Ring',
-        power: 'Teleportation',
-        bearer: userId,
-        image:
-          'https://r2.padrepauloricardo.org/uploads/aula/frame/1618/5-os-aneis-do-poder-slide-frame.jpg',
-      };
-
       const response = await request(app.server)
         .put(`/rings/${ringId}`)
         .set({ Authorization: `Bearer ${TOKEN}` })
-        .send(updatedRing);
+        .send({
+          name: 'Updated Ring',
+          power: 'Teleportation',
+          bearer: userId,
+          image:
+            'https://r2.padrepauloricardo.org/uploads/aula/frame/1618/5-os-aneis-do-poder-slide-frame.jpg',
+        });
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual({
         id: ringId,
-        name: updatedRing.name,
-        power: updatedRing.power,
+        name: 'Updated Ring',
+        power: 'Teleportation',
         bearer: userId,
         forgedBy: userId,
-        image: updatedRing.image,
+        image:
+          'https://r2.padrepauloricardo.org/uploads/aula/frame/1618/5-os-aneis-do-poder-slide-frame.jpg',
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
       });
@@ -138,11 +147,12 @@ describe('Ring Routes', () => {
         .send({ name: 'Updated Ring', power: 'New Power' });
 
       expect(response.status).toBe(404);
-      expect(response.body).toEqual({ error: 'Ring not found' });
+      expect(response.body).toEqual({ message: 'Ring not found' });
     });
   });
 
   describe('GET /rings/:id', () => {
+    ('');
     it('should get a ring by id', async () => {
       const response = await request(app.server)
         .get(`/rings/${ringId}`)
@@ -169,7 +179,7 @@ describe('Ring Routes', () => {
 
       expect(response.status).toBe(404);
       expect(response.body).toEqual({
-        error: 'Ring not found',
+        message: 'Ring not found',
       });
     });
   });
@@ -204,7 +214,9 @@ describe('Ring Routes', () => {
         .set({ Authorization: `Bearer invalidToken` });
 
       expect(response.status).toBe(401);
-      expect(response.body).toEqual({ error: 'Token Unauthorized' });
+      expect(response.body).toEqual({
+        message: 'Invalid token',
+      });
     });
   });
 
@@ -224,7 +236,7 @@ describe('Ring Routes', () => {
         .set({ Authorization: `Bearer ${TOKEN}` });
 
       expect(response.status).toBe(404);
-      expect(response.body).toEqual({ error: 'Ring not found' });
+      expect(response.body).toEqual({ message: 'Ring not found' });
     });
 
     it('should return 401 if unauthorized', async () => {
@@ -233,7 +245,9 @@ describe('Ring Routes', () => {
         .set({ Authorization: `Bearer invalidToken` });
 
       expect(response.status).toBe(401);
-      expect(response.body).toEqual({ error: 'Token Unauthorized' });
+      expect(response.body).toEqual({
+        message: 'Invalid token',
+      });
     });
   });
 });

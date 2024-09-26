@@ -117,10 +117,7 @@ describe('Ring Controller', () => {
       const request = createRequest({ ringId: 1 }, {}, testUser);
       (getRingService as Mock).mockResolvedValue(null);
 
-      await getRing(request, reply);
-
-      expect(reply.status).toHaveBeenCalledWith(404);
-      expect(reply.send).toHaveBeenCalledWith({ error: 'Ring not found' });
+      await expect(getRing(request, reply)).rejects.toThrow('Ring not found');
     });
   });
 
@@ -146,10 +143,7 @@ describe('Ring Controller', () => {
       const request = createRequest({ ringId: 1 }, {}, { userId: '', class: '' });
       (request as any).user = undefined;
 
-      await getAllRings(request, reply);
-
-      expect(reply.status).toHaveBeenCalledWith(401);
-      expect(reply.send).toHaveBeenCalledWith({ error: 'User not authenticated' });
+      await expect(getAllRings(request, reply)).rejects.toThrow('User not authenticated');
     });
   });
 
@@ -191,21 +185,17 @@ describe('Ring Controller', () => {
         {},
         { userId: '', class: '' }
       ) as FastifyRequest<{
-        Params: { ringId: number };
         Body: {
           name: string;
-          forgedBy: string;
           power: string;
           bearer: string;
+          forgedBy: string;
           image: string;
         };
       }>;
       (request as any).user = undefined;
 
-      await createRing(request, reply);
-
-      expect(reply.status).toHaveBeenCalledWith(401);
-      expect(reply.send).toHaveBeenCalledWith({ error: 'User not authenticated' });
+      await expect(createRing(request, reply)).rejects.toThrow('User not authenticated');
     });
   });
 
@@ -239,21 +229,24 @@ describe('Ring Controller', () => {
     });
 
     it('should return 404 if ring not found', async () => {
-      const testUser = { userId: '550e8400-e29b-41d4-a716-446655440006', class: 'Anão' };
+      const testUser = {
+        userId: '550e8400-e29b-41d4-a716-446655440006',
+        class: 'Anão',
+      };
       const request = createRequest({ ringId: 1 }, {}, testUser) as FastifyRequest<{
         Params: { ringId: number };
         Body: { name: string; power: string; bearer: string; image?: string | undefined };
       }>;
       (getRingService as Mock).mockResolvedValue(null);
 
-      await updateRing(request, reply);
-
-      expect(reply.status).toHaveBeenCalledWith(404);
-      expect(reply.send).toHaveBeenCalledWith({ error: 'Ring not found' });
+      await expect(updateRing(request, reply)).rejects.toThrow('Ring not found');
     });
 
     it('should return 403 if user is not authorized', async () => {
-      const testUser = { userId: '550e8400-e29b-41d4-a716-446655440007', class: 'Elfo' };
+      const testUser = {
+        userId: '550e8400-e29b-41d4-a716-446655440007',
+        class: 'Elfo',
+      };
       const request = createRequest({ ringId: 1 }, {}, testUser) as FastifyRequest<{
         Params: { ringId: number };
         Body: { name: string; power: string; bearer: string; image?: string | undefined };
@@ -261,12 +254,9 @@ describe('Ring Controller', () => {
       const mockRing = { id: 1, bearer: 'other-user' };
       (getRingService as Mock).mockResolvedValue(mockRing);
 
-      await updateRing(request, reply);
-
-      expect(reply.status).toHaveBeenCalledWith(403);
-      expect(reply.send).toHaveBeenCalledWith({
-        error: 'Unauthorized to perform this action',
-      });
+      await expect(updateRing(request, reply)).rejects.toThrow(
+        'Unauthorized to perform this action'
+      );
     });
   });
 
@@ -289,29 +279,28 @@ describe('Ring Controller', () => {
     });
 
     it('should return 404 if ring not found', async () => {
-      const testUser = { userId: '550e8400-e29b-41d4-a716-446655440009', class: 'Anão' };
+      const testUser = {
+        userId: '550e8400-e29b-41d4-a716-446655440009',
+        class: 'Anão',
+      };
       const request = createRequest({ ringId: 1 }, {}, testUser);
       (getRingService as Mock).mockResolvedValue(null);
 
-      await deleteRing(request, reply);
-
-      expect(reply.status).toHaveBeenCalledWith(404);
-      expect(reply.send).toHaveBeenCalledWith({ error: 'Ring not found' });
+      await expect(deleteRing(request, reply)).rejects.toThrow('Ring not found');
     });
 
     it('should return 403 if user is not authorized', async () => {
-      const testUser = { userId: '550e8400-e29b-41d4-a716-446655440010', class: 'Elfo' };
+      const testUser = {
+        userId: '550e8400-e29b-41d4-a716-446655440010',
+        class: 'Elfo',
+      };
       const request = createRequest({ ringId: 1 }, {}, testUser);
       const mockRing = { id: 1, bearer: 'other-user' };
-
       (getRingService as Mock).mockResolvedValue(mockRing);
 
-      await deleteRing(request, reply);
-
-      expect(reply.status).toHaveBeenCalledWith(403);
-      expect(reply.send).toHaveBeenCalledWith({
-        error: 'Unauthorized to perform this action',
-      });
+      await expect(deleteRing(request, reply)).rejects.toThrow(
+        'Unauthorized to perform this action'
+      );
     });
   });
 });

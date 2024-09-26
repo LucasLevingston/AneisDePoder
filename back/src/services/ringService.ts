@@ -7,12 +7,7 @@ export const createRingService = async (newRing: {
   forgedBy: string;
   image?: string;
 }) => {
-  try {
-    const createdRing = await Ring.create(newRing, { returning: true });
-    return createdRing;
-  } catch (error) {
-    throw new Error('Error creating ring in the database: ' + error);
-  }
+  return await Ring.create(newRing);
 };
 
 export const updateRingService = async (updatedRing: {
@@ -22,12 +17,6 @@ export const updateRingService = async (updatedRing: {
   bearer: string;
   image?: string;
 }) => {
-  const ring = await getRingService(updatedRing.id);
-
-  if (ring && ring.bearer !== updatedRing.bearer) {
-    throw new Error('Not authorized');
-  }
-
   await Ring.update(
     {
       name: updatedRing.name,
@@ -41,24 +30,12 @@ export const updateRingService = async (updatedRing: {
   return await getRingService(updatedRing.id);
 };
 
-export const deleteRingService = async (id: number, bearerId: string) => {
-  const ring = await Ring.findOne({ where: { id } });
-
-  if (!ring) {
-    throw new Error('Ring not found');
-  }
-
-  if (ring.bearer !== bearerId) {
-    throw new Error('Not authorized');
-  }
-
-  await Ring.destroy({ where: { id } });
+export const deleteRingService = async (id: number) => {
+  return await Ring.destroy({ where: { id } });
 };
 
 export const getRingService = async (id: number) => {
-  const ring = await Ring.findOne({ where: { id } });
-
-  return ring ? ring : null;
+  return await Ring.findOne({ where: { id } });
 };
 
 export const getAllRingsService = async () => {
@@ -66,11 +43,9 @@ export const getAllRingsService = async () => {
 };
 
 export const getAllRingsByBearerId = async (bearerId: string) => {
-  const rings = await Ring.findAll({
+  return await Ring.findAll({
     where: {
       bearer: bearerId,
     },
   });
-
-  return rings;
 };

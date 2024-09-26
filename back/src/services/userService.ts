@@ -2,6 +2,7 @@ import { where } from 'sequelize';
 import { comparePassword, generateToken, hashPassword } from '../utils/authUtils';
 import { FastifyError } from 'fastify';
 import User from '../models/user';
+import { ClientError } from '../errors/client-error';
 
 export const createUserService = async (newUser: {
   username: string;
@@ -19,7 +20,7 @@ export const createUserService = async (newUser: {
     });
 
     if (!result) {
-      throw new Error('Error on create user');
+      throw new ClientError('Error on create user');
     }
     const data = {
       id: result.id,
@@ -29,7 +30,7 @@ export const createUserService = async (newUser: {
     };
     return data;
   } catch (error) {
-    throw new Error('Error creating user');
+    throw new ClientError('Error creating user');
   }
 };
 
@@ -43,12 +44,12 @@ export const loginUserService = async (loginData: {
   const user = await getByEmail(loginData.email);
 
   if (!user) {
-    throw new Error('User not found');
+    throw new ClientError('User not found');
   }
 
   const isPasswordValid = await comparePassword(loginData.password, user.password);
   if (!isPasswordValid) {
-    throw new Error('Invalid password');
+    throw new ClientError('Invalid password');
   }
 
   const token = generateToken(user.id);

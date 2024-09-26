@@ -8,7 +8,7 @@ import {
   loginUserService,
 } from '../../services/userService';
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { hashPassword } from '../../utils/authUtils';
+import { ClientError } from '../../errors/client-error';
 
 vi.mock('../../services/userService');
 
@@ -111,7 +111,7 @@ describe('UserController', async () => {
     });
 
     it('should return 500 on login service failure', async () => {
-      (loginUserService as Mock).mockRejectedValue(new Error('Login failed'));
+      (loginUserService as Mock).mockRejectedValue(new ClientError('Login failed'));
 
       const mockRequest = {
         body: {

@@ -7,6 +7,7 @@ import {
   getUserService,
   loginUserService,
 } from '../services/userService';
+import { ClientError } from '../errors/client-error';
 
 export const registerUser = async (
   request: FastifyRequest<{
@@ -18,7 +19,7 @@ export const registerUser = async (
     const data = request.body;
 
     if (await getByUsername(data.username)) {
-      throw new Error('User already exists');
+      throw new ClientError('User already exists');
     }
     const user = await createUserService(data);
     reply.status(201).send({

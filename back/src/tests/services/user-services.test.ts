@@ -8,6 +8,7 @@ import {
 } from '../../services/userService';
 import { comparePassword, generateToken, hashPassword } from '../../utils/authUtils';
 import User from '../../models/user';
+import { ClientError } from '../../errors/client-error';
 
 vi.mock('../../models/user', () => ({
   __esModule: true,
@@ -64,7 +65,7 @@ describe('User Service', () => {
 
     it('should throw an error when creating a user fails', async () => {
       (hashPassword as Mock).mockResolvedValue('hashedpassword');
-      (User.create as Mock).mockRejectedValue(new Error('Database error'));
+      (User.create as Mock).mockRejectedValue(new ClientError('Database error'));
 
       await expect(createUserService(mockUser)).rejects.toThrow('Error creating user');
     });

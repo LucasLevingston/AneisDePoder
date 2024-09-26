@@ -2,73 +2,18 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 import {
   createRingService,
   deleteRingService,
-  getAllRingsByBearerId,
   getAllRingsService,
-  getRingService,
   updateRingService,
 } from '../services/ringService';
-import { authenticate } from '../middleware/authMiddleware';
-import { getById } from '../services/userService';
+import { checkPermission } from '../utils/checkPermission';
+import { checkRingExists } from '../utils/checkRingExists';
+import { checkAuthentication } from '../utils/checkAuthentication';
+import { checkPortedRings } from '../utils/checkPortedRings';
+import Ring from '../models/ring';
 
 interface RingParams {
   ringId: number;
 }
-
-const checkAuthentication = async (request: FastifyRequest, reply: FastifyReply) => {
-  await authenticate(request, reply);
-  const reqUser = request.user;
-  if (!reqUser) {
-    reply.status(401).send({ error: 'User not authenticated' });
-    return null;
-  }
-  return reqUser;
-};
-
-const checkRingExists = async (ringId: number, reply: FastifyReply) => {
-  const ring = await getRingService(ringId);
-  if (!ring) {
-    return null;
-  }
-  return ring;
-};
-
-const checkPermission = (ring: any, reqUser: any, reply: FastifyReply) => {
-  if (ring.bearer !== reqUser.userId) {
-    return false;
-  }
-  return true;
-};
-
-const checkPortedRings = async (bearerId: string) => {
-  const user = await getById(bearerId);
-  if (!user) {
-    throw new Error('User not found');
-  }
-  const rings = (await getAllRingsByBearerId(bearerId)) || [];
-
-  let limit = 0;
-
-  switch (user.class) {
-    case 'Elfo':
-      limit = 3;
-      break;
-    case 'Anão':
-      limit = 7;
-      break;
-    case 'Homem':
-      limit = 9;
-      break;
-    case 'Sauron':
-      limit = 1;
-      break;
-    default:
-      throw new Error('Raça desconhecida');
-  }
-
-  if (rings.length >= limit) {
-    return `Você atingiu o limite de anéis permitidos pela classe.`;
-  }
-};
 
 export const getRing = async (
   request: FastifyRequest<{ Params: RingParams }>,
@@ -76,26 +21,15 @@ export const getRing = async (
 ) => {
   const { ringId } = request.params;
 
-  try {
-    const ring = await checkRingExists(ringId, reply);
-    if (!ring) return reply.status(404).send({ error: 'Ring not found' });
-
-    return reply.status(200).send(ring);
-  } catch (error: any) {
-    return reply.status(500).send(error);
-  }
+  const ring = await checkRingExists(ringId);
+  return reply.status(200).send(ring);
 };
 
 export const getAllRings = async (request: FastifyRequest, reply: FastifyReply) => {
-  const reqUser = await checkAuthentication(request, reply);
-  if (!reqUser) return reply.status(403).send({ error: 'Not Authorized' });
+  await checkAuthentication(request, reply);
 
-  try {
-    const rings = await getAllRingsService();
-    return reply.status(200).send(rings);
-  } catch (error: any) {
-    return reply.status(500).send(error);
-  }
+  const rings = await getAllRingsService();
+  return reply.status(200).send(rings);
 };
 
 export const createRing = async (
@@ -110,51 +44,34 @@ export const createRing = async (
   }>,
   reply: FastifyReply
 ) => {
-  try {
-    const reqUser = await checkAuthentication(request, reply);
-    if (!reqUser) return reply.status(403).send({ error: 'Not Authorized' });
+  const reqUser = await checkAuthentication(request, reply);
+  await checkPortedRings(reqUser.userId);
 
-    const portedResult = await checkPortedRings(reqUser.userId);
-    if (portedResult === 'Você atingiu o limite de anéis permitidos pela classe.')
-      return reply.status(405).send({ error: portedResult });
+  const newRing = await createRingService(request.body);
 
-    const newRing = await createRingService({
-      ...request.body,
-      forgedBy: reqUser.userId,
-    });
-
-    return reply.status(201).send(newRing);
-  } catch (error: any) {
-    return reply.status(400).send({ error: error.message });
-  }
+  return reply.status(201).send(newRing);
 };
 
 export const updateRing = async (
   request: FastifyRequest<{
-    Params: { ringId: number };
+    Params: RingParams;
     Body: { name: string; power: string; bearer: string; image?: string };
   }>,
   reply: FastifyReply
 ) => {
   const { ringId } = request.params;
-  try {
-    const ring = await checkRingExists(ringId, reply);
-    if (!ring) return reply.status(404).send({ error: 'Ring not found' });
 
-    const reqUser = await checkAuthentication(request, reply);
-    if (!reqUser) return reply.status(403).send({ error: 'Not Authorized' });
+  const ring = await checkRingExists(ringId);
+  const { userId } = await checkAuthentication(request, reply);
 
-    if (!checkPermission(ring, reqUser, reply))
-      return reply.status(403).send({ error: 'Unauthorized to perform this action' });
-    const updatedRing = await updateRingService({
-      ...request.body,
-      id: Number(ringId),
-    });
+  checkPermission(ring.bearer, userId);
 
-    return reply.status(200).send(updatedRing);
-  } catch (error: any) {
-    return reply.status(500).send(error);
-  }
+  const updatedRing = await updateRingService({
+    ...request.body,
+    id: Number(ringId),
+  });
+
+  return reply.status(200).send(updatedRing);
 };
 
 export const deleteRing = async (
@@ -163,19 +80,11 @@ export const deleteRing = async (
 ) => {
   const { ringId } = request.params;
 
-  try {
-    const ring = await checkRingExists(ringId, reply);
-    if (!ring) return reply.status(404).send({ error: 'Ring not found' });
+  const ring = await checkRingExists(ringId);
+  const { userId } = await checkAuthentication(request, reply);
 
-    const reqUser = await checkAuthentication(request, reply);
-    if (!reqUser) return reply.status(403).send({ error: 'Not Authorized' });
+  checkPermission(ring.bearer, userId);
 
-    if (!checkPermission(ring, reqUser, reply))
-      return reply.status(403).send({ error: 'Unauthorized to perform this action' });
-
-    await deleteRingService(ring.id, reqUser.userId);
-    return reply.status(204).send({});
-  } catch (error: any) {
-    return reply.status(500).send(error);
-  }
+  await deleteRingService(ring.id);
+  return reply.status(204).send({});
 };

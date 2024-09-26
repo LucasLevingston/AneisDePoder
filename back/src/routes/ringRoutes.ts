@@ -40,10 +40,11 @@ export async function ringRoutes(fastify: FastifyInstance) {
             updatedAt: z.date(),
           }),
           400: z.object({
-            error: z.string(),
+            message: z.string(),
+            errors: z.record(z.array(z.string())).optional(),
           }),
           500: z.object({
-            error: z.string(),
+            message: z.string(),
           }),
         },
       },
@@ -82,13 +83,14 @@ export async function ringRoutes(fastify: FastifyInstance) {
             updatedAt: z.date(),
           }),
           400: z.object({
-            error: z.string(),
+            message: z.string(),
+            errors: z.record(z.array(z.string())).optional(),
           }),
           404: z.object({
-            error: z.string(),
+            message: z.string(),
           }),
           500: z.object({
-            error: z.string(),
+            message: z.string(),
           }),
         },
       },
@@ -117,7 +119,7 @@ export async function ringRoutes(fastify: FastifyInstance) {
             updatedAt: z.date(),
           }),
           404: z.object({
-            error: z.string(),
+            message: z.string(),
           }),
         },
       },
@@ -144,8 +146,11 @@ export async function ringRoutes(fastify: FastifyInstance) {
               updatedAt: z.date(),
             })
           ),
+          404: z.object({
+            message: z.string(),
+          }),
           500: z.object({
-            error: z.string(),
+            message: z.string(),
           }),
         },
       },
@@ -165,10 +170,11 @@ export async function ringRoutes(fastify: FastifyInstance) {
         response: {
           204: z.object({}),
           404: z.object({
-            error: z.string(),
+            message: z.string(),
+            errors: z.record(z.array(z.string())).optional(),
           }),
           500: z.object({
-            error: z.string(),
+            message: z.string(),
           }),
         },
       },
