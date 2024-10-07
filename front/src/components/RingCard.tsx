@@ -1,7 +1,7 @@
-import { Ring } from '@/types/Ring.ts';
-import React, { useEffect, useState } from 'react';
-import { Button } from './ui/button.tsx';
-import { useUser } from '@/hooks/use-user.ts';
+import { Ring } from '@/types/Ring.ts'
+import React, { useEffect, useState } from 'react'
+import { Button } from './ui/button.tsx'
+import { useUser } from '@/hooks/use-user.ts'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,60 +12,60 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/ui/alert-dialog.tsx';
-import { useRings } from '@/hooks/use-rings.ts';
-import { Bounce, toast } from 'react-toastify';
-import { z } from 'zod';
-import { ringSchema } from '@/schemas/createRing-schema.ts';
+} from '@/components/ui/alert-dialog.tsx'
+import { useRings } from '@/hooks/use-rings.ts'
+import { Bounce, toast } from 'react-toastify'
+import { z } from 'zod'
+import { ringSchema } from '@/schemas/createRing-schema.ts'
 
 export const RingCard: React.FC<{
-  ring: Ring;
+  ring: Ring
 }> = ({ ring }) => {
-  const { getUser } = useUser();
-  const user = useUser((state) => state.user);
-  const { deleteRing, updateRing } = useRings();
+  const { getUser } = useUser()
+  const user = useUser((state) => state.user)
+  const { deleteRing, updateRing } = useRings()
 
-  const [bearer, setBearer] = useState<string | null>(null);
-  const [forgedBy, setForgedBy] = useState<string | null>(null);
-  const [loadingBearer, setLoadingBearer] = useState<boolean>(true);
-  const [loadingForgedBy, setLoadingForgedBy] = useState<boolean>(true);
+  const [bearer, setBearer] = useState<string | null>(null)
+  const [forgedBy, setForgedBy] = useState<string | null>(null)
+  const [loadingBearer, setLoadingBearer] = useState<boolean>(true)
+  const [loadingForgedBy, setLoadingForgedBy] = useState<boolean>(true)
 
-  const [isEditOpen, setIsEditOpen] = useState(false);
-  const [editedRing, setEditedRing] = useState<Ring>(ring);
-  const [errors, setErrors] = useState<any>({});
+  const [isEditOpen, setIsEditOpen] = useState(false)
+  const [editedRing, setEditedRing] = useState<Ring>(ring)
+  const [errors, setErrors] = useState<any>({})
 
   useEffect(() => {
     const fetchBearer = async () => {
       try {
-        const result = await getUser(ring.bearer);
-        setBearer(result ? result.username : 'Usuário não encontrado');
+        const result = await getUser(ring.bearer)
+        setBearer(result ? result.username : 'Usuário não encontrado')
       } catch (error) {
-        console.error('Erro ao buscar portador:', error);
-        setBearer('Erro ao buscar portador');
+        console.error('Erro ao buscar portador:', error)
+        setBearer('Erro ao buscar portador')
       } finally {
-        setLoadingBearer(false);
+        setLoadingBearer(false)
       }
-    };
+    }
 
     const fetchForgedBy = async () => {
       try {
-        const result = await getUser(ring.forgedBy);
-        setForgedBy(result ? result.username : 'Usuário não encontrado');
+        const result = await getUser(ring.forgedBy)
+        setForgedBy(result ? result.username : 'Usuário não encontrado')
       } catch (error) {
-        console.error('Erro ao buscar forjador:', error);
-        setForgedBy('Erro ao buscar forjador');
+        console.error('Erro ao buscar forjador:', error)
+        setForgedBy('Erro ao buscar forjador')
       } finally {
-        setLoadingForgedBy(false);
+        setLoadingForgedBy(false)
       }
-    };
+    }
 
-    fetchBearer();
-    fetchForgedBy();
-  }, [getUser, ring.bearer, ring.forgedBy]);
+    fetchBearer()
+    fetchForgedBy()
+  }, [getUser, ring.bearer, ring.forgedBy])
 
   const handleDelete = async (id: number) => {
     try {
-      const result = await deleteRing(id);
+      const result = await deleteRing(id)
       if (result) {
         toast.warning('Anel excluído com sucesso!', {
           position: 'top-right',
@@ -77,7 +77,7 @@ export const RingCard: React.FC<{
           progress: undefined,
           theme: 'colored',
           transition: Bounce,
-        });
+        })
       }
     } catch (error) {
       toast.error('Erro ao excluir o anel.', {
@@ -90,15 +90,15 @@ export const RingCard: React.FC<{
         progress: undefined,
         theme: 'colored',
         transition: Bounce,
-      });
+      })
     }
-  };
+  }
 
   const handleEdit = async (e: React.MouseEvent) => {
-    e.preventDefault();
+    e.preventDefault()
     try {
-      ringSchema.parse(editedRing);
-      const result = await updateRing(ring.id, editedRing);
+      ringSchema.parse(editedRing)
+      const result = await updateRing(ring.id, editedRing)
       if (result) {
         toast.success('Anel atualizado com sucesso!', {
           position: 'top-right',
@@ -110,12 +110,12 @@ export const RingCard: React.FC<{
           progress: undefined,
           theme: 'colored',
           transition: Bounce,
-        });
-        setIsEditOpen(false);
+        })
+        setIsEditOpen(false)
       }
     } catch (error) {
       if (error instanceof z.ZodError) {
-        setErrors(error.flatten().fieldErrors);
+        setErrors(error.flatten().fieldErrors)
       } else {
         toast.error('Erro ao atualizar o anel.', {
           position: 'top-right',
@@ -127,14 +127,14 @@ export const RingCard: React.FC<{
           progress: undefined,
           theme: 'colored',
           transition: Bounce,
-        });
+        })
       }
     }
-  };
+  }
 
   const getErrorMessage = (field: string) => {
-    return errors[field]?.[0];
-  };
+    return errors[field]?.[0]
+  }
 
   return (
     <div className="border p-4 max-w-xs w-full h-[488px] flex flex-col justify-between rounded-xl bg-gray">
@@ -147,8 +147,8 @@ export const RingCard: React.FC<{
                 alt={`Imagem do anel: ${ring.name}`}
                 className="w-full h-full object-cover rounded-lg"
                 onError={(e) => {
-                  e.currentTarget.src = 'link-para-imagem-padrão.jpg';
-                  e.currentTarget.alt = '';
+                  e.currentTarget.src = 'link-para-imagem-padrão.jpg'
+                  e.currentTarget.alt = ''
                 }}
               />
             </div>
@@ -165,7 +165,7 @@ export const RingCard: React.FC<{
         </div>
       </div>
 
-      <div className="flex gap-3 justify-between text-sm md:text-base">
+      <div className="flex gap-3 flex-col text-sm md:text-base">
         <p className="flex gap-2">
           Portador:
           <span className="font-medium text-black">
@@ -271,5 +271,5 @@ export const RingCard: React.FC<{
         </div>
       )}
     </div>
-  );
-};
+  )
+}

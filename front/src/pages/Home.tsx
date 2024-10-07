@@ -1,24 +1,24 @@
-import React, { useEffect } from 'react';
-import Slider from 'react-slick';
-import Header from '../components/Header.tsx';
-import Container from '../components/Container.tsx';
-import { useUser } from '../hooks/use-user.ts';
-import { useRings } from '../hooks/use-rings.ts';
-import { RingCard } from '@/components/RingCard.tsx';
-import CreateRing from '@/components/CreateRing.tsx';
-import { Bounce, toast } from 'react-toastify';
-import 'slick-carousel/slick/slick.css';
-import 'slick-carousel/slick/slick-theme.css';
+import React, { useEffect } from 'react'
+import Slider from 'react-slick'
+import Header from '../components/Header.tsx'
+import Container from '../components/Container.tsx'
+import { useUser } from '../hooks/use-user.ts'
+import { useRings } from '../hooks/use-rings.ts'
+import { RingCard } from '@/components/RingCard.tsx'
+import CreateRing from '@/components/CreateRing.tsx'
+import { Bounce, toast } from 'react-toastify'
+import 'slick-carousel/slick/slick.css'
+import 'slick-carousel/slick/slick-theme.css'
+import useAuth from '@/middleware/auth.ts'
 
 const Home = () => {
-  const { rings, loading, error, fetchRings } = useRings();
-  const user = useUser((state) => state.user);
-
+  const { rings, loading, error, fetchRings } = useRings()
+  const user = useUser((state) => state.user)
+  useAuth()
   useEffect(() => {
-    fetchRings();
-  }, [fetchRings]);
-
-  const Loading = () => <div>Loading...</div>;
+    fetchRings()
+  }, [fetchRings])
+  const Loading = () => <div>Loading...</div>
 
   const settings = {
     dots: true,
@@ -45,13 +45,12 @@ const Home = () => {
         },
       },
     ],
-  };
+  }
 
   return (
     <div>
       <Header />
       {loading && <Loading />}
-      {!user && <Container>Faça o login</Container>}
       {
         <Container>
           <div className="h-full space-y-3">
@@ -88,7 +87,7 @@ const Home = () => {
           transition: Bounce,
         })}
     </div>
-  );
-};
+  )
+}
 
-export default Home;
+export default Home
