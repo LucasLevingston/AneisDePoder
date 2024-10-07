@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import Header from '../components/Header.tsx';
-import Container from '../components/Container.tsx';
-import { useUser } from '../hooks/use-user.ts';
-import { Bounce, toast } from 'react-toastify';
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import { Check, ChevronsUpDown } from 'lucide-react';
+import React, { useEffect, useState } from 'react'
+import Header from '../components/Header.tsx'
+import Container from '../components/Container.tsx'
+import { useUser } from '../hooks/use-user.ts'
+import { Bounce, toast } from 'react-toastify'
+import { FaEye, FaEyeSlash } from 'react-icons/fa'
+import { Check, ChevronsUpDown } from 'lucide-react'
 
-import { cn } from '@/lib/utils.ts';
-import { Button } from '@/components/ui/button.tsx';
+import { cn } from '@/lib/utils.ts'
+import { Button } from '@/components/ui/button.tsx'
 import {
   Command,
   CommandEmpty,
@@ -15,28 +15,28 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from '@/components/ui/command.tsx';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover.tsx';
+} from '@/components/ui/command.tsx'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover.tsx'
 
 export default function Login() {
-  const [active, setActive] = useState('login');
+  const [active, setActive] = useState('login')
   const [registerFormData, setRegisterFormData] = useState({
     email: '',
     username: '',
     password: '',
     confirmPassword: '',
     class: '',
-  });
+  })
   const [loginFormData, setLoginFormData] = useState({
     email: '',
     password: '',
-  });
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [showPassword, setShowPassword] = useState(false);
-  const [open, setOpen] = React.useState(false);
+  })
+  const [errors, setErrors] = useState<{ [key: string]: string }>({})
+  const [showPassword, setShowPassword] = useState(false)
+  const [open, setOpen] = React.useState(false)
 
-  const user = useUser((state) => state.user);
-  const { login, register } = useUser();
+  const user = useUser((state) => state.user)
+  const { login, register } = useUser()
   const classOptions = [
     {
       value: 'Elfo',
@@ -54,7 +54,7 @@ export default function Login() {
       value: 'Sauron',
       label: 'Sauron',
     },
-  ];
+  ]
   useEffect(() => {
     if (user) {
       toast.success('Usuário logado com sucesso!', {
@@ -67,39 +67,39 @@ export default function Login() {
         progress: undefined,
         theme: 'colored',
         transition: Bounce,
-      });
+      })
       setTimeout(() => {
-        window.location.href = '/';
-      }, 1000);
+        window.location.href = '/'
+      }, 1000)
     }
-  }, [user]);
+  }, [user])
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = event.target;
+    const { name, value } = event.target
 
     if (active === 'cadastrar') {
       setRegisterFormData((prev) => ({
         ...prev,
         [name]: value,
-      }));
+      }))
     } else {
       setLoginFormData((prev) => ({
         ...prev,
         [name]: value,
-      }));
+      }))
     }
 
-    setErrors((prev) => ({ ...prev, [name]: '' }));
-  };
+    setErrors((prev) => ({ ...prev, [name]: '' }))
+  }
 
   const onLoginSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
+    event.preventDefault()
 
     try {
-      const result = await login(loginFormData);
+      const result = await login(loginFormData)
 
       if (!result) {
-        throw new Error('Usuário ou senha inválidos.');
+        throw new Error('Usuário ou senha inválidos.')
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -113,7 +113,7 @@ export default function Login() {
           progress: undefined,
           theme: 'colored',
           transition: Bounce,
-        });
+        })
       } else {
         toast.error('Erro inesperado. Tente novamente mais tarde.', {
           position: 'top-right',
@@ -125,18 +125,18 @@ export default function Login() {
           progress: undefined,
           theme: 'colored',
           transition: Bounce,
-        });
+        })
       }
     }
-  };
+  }
 
   const onRegisterSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
+    event.preventDefault()
 
     try {
-      const result = await register(registerFormData);
+      const result = await register(registerFormData)
       if (!result) {
-        throw new Error('Erro ao registrar.');
+        throw new Error('Erro ao registrar.')
       }
 
       toast.success('Registro realizado com sucesso!', {
@@ -149,7 +149,7 @@ export default function Login() {
         progress: undefined,
         theme: 'colored',
         transition: Bounce,
-      });
+      })
     } catch (error) {
       if (error instanceof Error) {
         toast.error(error.message || 'Erro inesperado. Tente novamente.', {
@@ -162,8 +162,8 @@ export default function Login() {
           progress: undefined,
           theme: 'colored',
           transition: Bounce,
-        });
-        console.error('Register failed:', error.message);
+        })
+        console.error('Register failed:', error.message)
       } else {
         toast.error('Erro inesperado. Tente novamente mais tarde.', {
           position: 'top-right',
@@ -175,10 +175,10 @@ export default function Login() {
           progress: undefined,
           theme: 'colored',
           transition: Bounce,
-        });
+        })
       }
     }
-  };
+  }
 
   return (
     <div className="flex flex-col h-screen">
@@ -277,8 +277,8 @@ export default function Login() {
                                         currentValue === registerFormData.class
                                           ? ''
                                           : currentValue,
-                                    });
-                                    setOpen(false);
+                                    })
+                                    setOpen(false)
                                   }}
                                 >
                                   <Check
@@ -418,5 +418,5 @@ export default function Login() {
         </Container>
       )}
     </div>
-  );
+  )
 }

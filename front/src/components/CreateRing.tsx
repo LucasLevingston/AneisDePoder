@@ -1,49 +1,49 @@
-import React, { useState } from 'react';
-import { Textarea } from './ui/textarea.tsx';
-import { Input } from './ui/input.tsx';
-import { Button } from './ui/button.tsx';
-import { z } from 'zod';
-import { useRings } from '@/hooks/use-rings.ts';
-import { useUser } from '@/hooks/use-user.ts';
-import { ringSchema } from '@/schemas/createRing-schema.ts';
-import { Bounce, toast } from 'react-toastify';
+import React, { useState } from 'react'
+import { Textarea } from './ui/textarea.tsx'
+import { Input } from './ui/input.tsx'
+import { Button } from './ui/button.tsx'
+import { z } from 'zod'
+import { useRings } from '@/hooks/use-rings.ts'
+import { useUser } from '@/hooks/use-user.ts'
+import { ringSchema } from '@/schemas/createRing-schema.ts'
+import { Bounce, toast } from 'react-toastify'
 
 const CreateRing = () => {
   const [formData, setFormData] = useState({
     name: '',
     power: '',
     image: '',
-  });
-  const [errors, setErrors] = useState<z.ZodError | null>(null);
+  })
+  const [errors, setErrors] = useState<z.ZodError | null>(null)
 
-  const user = useUser((state) => state.user);
-  const { createRing } = useRings();
+  const user = useUser((state) => state.user)
+  const { createRing } = useRings()
 
   if (!user) {
-    return <p>Você precisa estar logado para criar um anel.</p>;
+    return <p>Você precisa estar logado para criar um anel.</p>
   }
 
   const handleChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const { name, value } = event.target;
+    const { name, value } = event.target
     setFormData((prev) => ({
       ...prev,
       [name]: value,
-    }));
-  };
+    }))
+  }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+    event.preventDefault()
     try {
-      ringSchema.parse(formData);
+      ringSchema.parse(formData)
       const ringData = {
         ...formData,
         bearer: user.user.id,
         forgedBy: user.user.id,
-      };
+      }
 
-      const result = await createRing(ringData);
+      const result = await createRing(ringData)
       if (result) {
         toast.success('Anel criado com sucesso!', {
           position: 'top-right',
@@ -55,14 +55,14 @@ const CreateRing = () => {
           progress: undefined,
           theme: 'colored',
           transition: Bounce,
-        });
+        })
       }
 
-      setErrors(null);
-      setFormData({ name: '', power: '', image: '' });
+      setErrors(null)
+      setFormData({ name: '', power: '', image: '' })
     } catch (error) {
       if (error instanceof z.ZodError) {
-        setErrors(error);
+        setErrors(error)
       } else {
         toast.error('Erro ao criar anel: ' + error, {
           position: 'top-right',
@@ -74,14 +74,14 @@ const CreateRing = () => {
           progress: undefined,
           theme: 'colored',
           transition: Bounce,
-        });
+        })
       }
     }
-  };
+  }
 
   const getErrorMessage = (field: string) => {
-    return errors?.issues.find((err) => err.path[0] === field)?.message;
-  };
+    return errors?.issues.find((err) => err.path[0] === field)?.message
+  }
 
   return (
     <form
@@ -139,7 +139,7 @@ const CreateRing = () => {
         </Button>
       </div>
     </form>
-  );
-};
+  )
+}
 
-export default CreateRing;
+export default CreateRing
