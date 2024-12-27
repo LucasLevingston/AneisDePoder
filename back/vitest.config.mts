@@ -11,6 +11,7 @@ export default defineConfig({
     env: {
       ...config({ path: './.testing.env' }).parsed,
     },
+    fileParallelism: false,
     coverage: {
       provider: 'v8',
       include: ['src/**/*.ts'],
