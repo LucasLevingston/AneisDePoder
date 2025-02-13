@@ -1,7 +1,7 @@
 import Container from '@/components/Container.tsx';
 import Header from '@/components/Header.tsx';
 import { useUser } from '@/hooks/use-user.ts';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 
 export default function Profile() {
   const { user, getUser } = useUser();
